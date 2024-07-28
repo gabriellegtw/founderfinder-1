@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const cors = require("cors"); // Import the cors package
 const app = express();
 const port = 5001;
+const baseURL = process.env.BASE_URL || "https://founderfinder-1-cfmd.onrender.com";
 
 const http = require('http').createServer(app);
 // const io = require("socket.io")(http);
@@ -78,7 +79,7 @@ const sendVerificationEmail = async (email, verificationToken) => {
     
     Thanks so much for signing up with FounderFinder :)
     
-    Please click on the following link to verify your email : https://founderfinder-1-cfmd.onrender.com/verify/${verificationToken}
+    Please click on the following link to verify your email : ${baseURL}/verify/${verificationToken}
     
     Happy connecting!
     
@@ -86,7 +87,17 @@ const sendVerificationEmail = async (email, verificationToken) => {
   };
 
   try {
+
+    console.log("in verify email");
+    console.log("Base URL:", baseURL);
+
+    if (!baseURL || baseURL !== "https://founderfinder-1-cfmd.onrender.com") {
+      console.log("Base URL not set correctly or doesn't match expected value:", baseURL);
+      throw new Error("Base URL not set correctly or doesn't match expected value");
+    }
+    
     await sender.sendMail(mailOptions);
+
     console.log("Email sent!")
   } catch (error) {
     console.log("Error sending the verification email: ", error);
@@ -138,6 +149,7 @@ app.post("/send-email/:id", async (req,res) => {
     console.log("This is the user in send email", user)
     sendVerificationEmail(user.email, user.verificationToken);
     console.log("email resent!")
+    console.log("This is the base url: ", baseURL);
     return res.status(200).json({ message: 'Email sent successfully!' });
   } catch (error) {
     console.log("Error in send email link: ", error);
